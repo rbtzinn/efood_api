@@ -1,0 +1,51 @@
+{
+  "restaurantes": [
+    {
+      "id": 1,
+      "titulo": "La Dolce Vita Trattoria",
+      "tipo": "Italiana",
+      "avaliacao": 4.6,
+      "descricao": "A La Dolce Vita Trattoria leva a autêntica cozinha italiana até você! Desfrute de massas caseiras, pizzas deliciosas e risotos incríveis, tudo no conforto do seu lar.",
+      "capa": "https://images.unsplash.com/photo-1548365328-9f547fb0953d?q=80&w=1200&auto=format&fit=crop",
+      "cardapio": [
+        {
+          "id": 101,
+          "nome": "Pizza Marguerita",
+          "descricao_curta": "Molho de tomate, mussarela e manjericão fresco.",
+          "descricao": "A pizza Margherita é feita com molho de tomate fresco, queijo mussarela e manjericão, finalizada com azeite extra virgem. Serve de 2 a 3 pessoas.",
+          "preco": 60.9,
+          "porcao": "Serve: de 2 a 3 pessoas",
+          "foto": "https://images.unsplash.com/photo-1571997478779-2adcbbe9ab2a?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+          "id": 102,
+          "nome": "Lasanha Bolonhesa",
+          "descricao_curta": "Massa fresca, molho bolonhesa e queijo gratinado.",
+          "descricao": "Lasanha de massa fresca com ragù de carne, molho bechamel e queijo gratinado.",
+          "preco": 48.5,
+          "porcao": "Serve: 1 pessoa",
+          "foto": "https://images.unsplash.com/photo-1604908554115-35f1a9b0f1fa?q=80&w=1200&auto=format&fit=crop"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "titulo": "Hioki Sushi",
+      "tipo": "Japonesa",
+      "avaliacao": 4.9,
+      "descricao": "Sushis frescos, sashimis deliciosos e pratos quentes irresistíveis. Entrega rápida e qualidade garantida.",
+      "capa": "https://images.unsplash.com/photo-1593032457860-ef9cda3988a1?q=80&w=1200&auto=format&fit=crop",
+      "cardapio": [
+        {
+          "id": 201,
+          "nome": "Combo Sushi 24 peças",
+          "descricao_curta": "Salmão, atum e oshinko.",
+          "descricao": "Seleção com 24 peças variadas, incluindo niguiris, uramakis e hossomakis.",
+          "preco": 89.9,
+          "porcao": "Serve: 2 pessoas",
+          "foto": "https://images.unsplash.com/photo-1562158070-1d3b0100f1a3?q=80&w=1200&auto=format&fit=crop"
+        }
+      ]
+    }
+  ]
+}
