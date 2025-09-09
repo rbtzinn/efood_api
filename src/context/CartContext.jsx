@@ -16,6 +16,8 @@ export function CartProvider({ children }) {
     localStorage.setItem('efood:cart', JSON.stringify(items))
   }, [items])
 
+  // A função 'add' foi simplificada. Ela não pergunta mais nada, apenas adiciona.
+  // A lógica de confirmação agora vive inteiramente no App.jsx.
   const add = (product, qty = 1) => {
     setItems(prev => {
       const found = prev.find(i => i.id === product.id)
@@ -25,6 +27,7 @@ export function CartProvider({ children }) {
       return [...prev, { ...product, qty }]
     })
   }
+
   const remove = (id) => setItems(prev => prev.filter(i => i.id !== id))
   const inc = (id) => setItems(prev => prev.map(i => i.id === id ? { ...i, qty: i.qty + 1 } : i))
   const dec = (id) => setItems(prev => prev.map(i => i.id === id ? { ...i, qty: Math.max(1, i.qty - 1) } : i))
