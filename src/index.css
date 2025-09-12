@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  ADICIONADO: Define a cor de fundo padrão para todo o corpo do site.
+  Isso afeta a Home e a página de Restaurantes, como solicitado.
+*/
+body {
+  background-color: #FFF8F2;
+}
+
 :root {
   --container: 1100px;
 }
@@ -29,3 +37,4 @@
 .title {
   @apply text-3xl md:text-4xl font-bold tracking-tight;
 }
+

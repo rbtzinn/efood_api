@@ -1,11 +1,18 @@
-// styles.ts
 import styled from 'styled-components'
+import { Link } from 'react-router-dom'
+
+const cores = {
+  rosa: '#E66767',
+  creme: '#FFEBD9'
+}
 
 export const Card = styled.div`
   background-color: #fff;
   position: relative;
-  color: #e66767;
-  // border: 1px solid #e66767; // <--- REMOVA ESTA LINHA
+  color: ${cores.rosa};
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 `
 
 export const TagsContainer = styled.div`
@@ -17,8 +24,8 @@ export const TagsContainer = styled.div`
 `
 
 export const Tag = styled.span`
-  background-color: #e66767;
-  color: #ffebd9;
+  background-color: ${cores.rosa};
+  color: ${cores.creme};
   font-size: 12px;
   font-weight: bold;
   padding: 6px 10px;
@@ -34,9 +41,12 @@ export const Image = styled.img`
 
 export const Content = styled.div`
   padding: 8px;
-  border-left: 1px solid #e66767; // <--- ADICIONE ESTA LINHA
-  border-right: 1px solid #e66767; // <--- ADICIONE ESTA LINHA
-  border-bottom: 1px solid #e66767; // <--- ADICIONE ESTA LINHA
+  border-left: 1px solid ${cores.rosa};
+  border-right: 1px solid ${cores.rosa};
+  border-bottom: 1px solid ${cores.rosa};
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 `
 
 export const TopRow = styled.div`
@@ -49,6 +59,7 @@ export const TopRow = styled.div`
 export const Title = styled.h3`
   font-size: 18px;
   font-weight: bold;
+  color: ${cores.rosa};
 `
 
 export const Rating = styled.div`
@@ -68,14 +79,20 @@ export const Description = styled.p`
   font-size: 14px;
   line-height: 22px;
   margin-bottom: 16px;
+  flex-grow: 1;
+  color: ${cores.rosa};
 `
 
-export const ReadMoreButton = styled.button`
-  background-color: #e66767;
-  color: #ffebd9;
+export const ReadMoreButton = styled(Link)`
+  background-color: ${cores.rosa};
+  color: ${cores.creme};
   border: none;
   padding: 4px 6px;
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
+  text-align: center;
+  width: max-content;
+  text-decoration: none; // 3. Adicione isso para remover o sublinhado padrão do link
 `
+

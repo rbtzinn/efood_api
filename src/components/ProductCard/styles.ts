@@ -14,6 +14,7 @@ export const Card = styled.div`
   display: flex;
   flex-direction: column;
   cursor: pointer;
+  height: 340px;
 
   &:hover {
     transform: scale(1.02); /* Efeito opcional para melhorar a interatividade */
@@ -26,7 +27,6 @@ export const Image = styled.img`
   width: 100%;
   height: 160px;
   object-fit: cover;
-  border-radius: 8px;
 `
 
 // O título agora não precisa de margem superior, o container pai cuida disso
