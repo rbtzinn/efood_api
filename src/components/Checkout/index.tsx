@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState } from 'react'
 import { useCart } from '../../context/CartContext'
 import { money } from '../../utils'
 import {
@@ -10,7 +10,6 @@ import {
   ButtonGroup,
   Button,
   ConfirmationText,
-  // Estilos do novo modal importados
   ModalOverlay,
   ModalContent,
   ModalButtonGroup,
@@ -18,6 +17,12 @@ import {
   ModalCancelButton
 } from './styles'
 
+// Define the type for the API response
+type OrderResponse = {
+  orderId: string;
+}
+
+// --- Componente do Modal de Confirmação ---
 type ConfirmationModalProps = {
   open: boolean
   title: string
@@ -71,7 +76,13 @@ type Props = {
 export default function Checkout({ open, onClose }: Props) {
   const { items, total, clear } = useCart()
   const [step, setStep] = useState<Step>(Steps.DELIVERY)
-  const [isConfirmModalOpen, setConfirmModalOpen] = useState(false) // Estado para controlar o modal
+  const [isConfirmModalOpen, setConfirmModalOpen] = useState(false)
+  
+  // State for API interaction
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [apiError, setApiError] = useState('');
+  const [orderResponse, setOrderResponse] = useState<OrderResponse | null>(null);
+
   const [address, setAddress] = useState({
     receiver: '',
     address: '',
@@ -88,11 +99,6 @@ export default function Checkout({ open, onClose }: Props) {
     expiresYear: ''
   })
 
-  const orderId = useMemo(
-    () => Math.random().toString(36).slice(2, 10).toUpperCase(),
-    [step === Steps.CONFIRM]
-  )
-
   const canProceedPayment =
     address.receiver &&
     address.address &&
@@ -105,19 +111,24 @@ export default function Checkout({ open, onClose }: Props) {
     payment.cardNumber &&
     payment.cardCode &&
     payment.expiresMonth &&
-    payment.expiresYear
+    payment.expiresYear &&
+    payment.cardNumber.length >= 13 &&
+    payment.cardCode.length >= 3
 
   const resetAll = () => {
     clear()
     setAddress({ receiver: '', address: '', city: '', zipCode: '', number: '', complement: '' })
     setPayment({ cardName: '', cardNumber: '', cardCode: '', expiresMonth: '', expiresYear: '' })
     setStep(Steps.DELIVERY)
+    setOrderResponse(null);
+    setApiError('');
     onClose()
   }
 
-  // Novas funções para controlar o modal
   const handleOverlayClick = () => {
-    setConfirmModalOpen(true)
+    if (step !== Steps.CONFIRM) {
+      setConfirmModalOpen(true)
+    }
   }
 
   const handleConfirmExit = () => {
@@ -129,6 +140,65 @@ export default function Checkout({ open, onClose }: Props) {
     setConfirmModalOpen(false)
   }
 
+  // Função para fazer o POST para a API
+  const handleFinishPayment = async () => {
+    setIsSubmitting(true);
+    setApiError('');
+
+    const payload = {
+      products: items.map(item => ({
+        id: item.id,
+        price: item.price
+      })),
+      delivery: {
+        receiver: address.receiver,
+        address: {
+          description: address.address,
+          city: address.city,
+          zipCode: address.zipCode,
+          number: parseInt(address.number, 10),
+          complement: address.complement
+        }
+      },
+      payment: {
+        card: {
+          name: payment.cardName,
+          number: payment.cardNumber,
+          code: parseInt(payment.cardCode, 10),
+          expires: {
+            month: parseInt(payment.expiresMonth, 10),
+            year: parseInt(payment.expiresYear, 10)
+          }
+        }
+      }
+    };
+
+    try {
+      const response = await fetch('https://ebac-fake-api.vercel.app/api/efood/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error('Houve um erro ao processar seu pedido. Por favor, tente novamente.');
+      }
+
+      const data: OrderResponse = await response.json();
+      setOrderResponse(data);
+      setStep(Steps.CONFIRM);
+      clear(); // Limpa o carrinho após a confirmação do pedido
+
+    } catch (error: any) {
+      setApiError(error.message || 'Não foi possível conectar ao servidor.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+
   if (!open) return null;
 
   return (
@@ -136,28 +206,28 @@ export default function Checkout({ open, onClose }: Props) {
       <Overlay open={open} onClick={handleOverlayClick}>
         <Aside open={open} onClick={(e) => e.stopPropagation()}>
           {step === Steps.DELIVERY && (
-            <form>
+            <form onSubmit={(e) => { e.preventDefault(); setStep(Steps.PAYMENT); }}>
               <Title>Entrega</Title>
               <InputGroup>
                 <label htmlFor="receiver">Quem irá receber</label>
-                <input id="receiver" type="text" value={address.receiver} onChange={e => setAddress({...address, receiver: e.target.value})} />
+                <input id="receiver" type="text" value={address.receiver} onChange={e => setAddress({...address, receiver: e.target.value})} required />
               </InputGroup>
               <InputGroup>
                 <label htmlFor="address">Endereço</label>
-                <input id="address" type="text" value={address.address} onChange={e => setAddress({...address, address: e.target.value})} />
+                <input id="address" type="text" value={address.address} onChange={e => setAddress({...address, address: e.target.value})} required />
               </InputGroup>
               <InputGroup>
                 <label htmlFor="city">Cidade</label>
-                <input id="city" type="text" value={address.city} onChange={e => setAddress({...address, city: e.target.value})} />
+                <input id="city" type="text" value={address.city} onChange={e => setAddress({...address, city: e.target.value})} required />
               </InputGroup>
               <Row>
                 <InputGroup>
                   <label htmlFor="zipCode">CEP</label>
-                  <input id="zipCode" type="text" value={address.zipCode} onChange={e => setAddress({...address, zipCode: e.target.value})} />
+                  <input id="zipCode" type="text" value={address.zipCode} onChange={e => setAddress({...address, zipCode: e.target.value})} required />
                 </InputGroup>
                 <InputGroup>
                   <label htmlFor="number">Número</label>
-                  <input id="number" type="text" value={address.number} onChange={e => setAddress({...address, number: e.target.value})} />
+                  <input id="number" type="text" value={address.number} onChange={e => setAddress({...address, number: e.target.value})} required />
                 </InputGroup>
               </Row>
               <InputGroup>
@@ -165,7 +235,7 @@ export default function Checkout({ open, onClose }: Props) {
                 <input id="complement" type="text" value={address.complement} onChange={e => setAddress({...address, complement: e.target.value})} />
               </InputGroup>
               <ButtonGroup>
-                <Button type="button" onClick={() => setStep(Steps.PAYMENT)} disabled={!canProceedPayment}>
+                <Button type="submit" disabled={!canProceedPayment}>
                   Continuar com o pagamento
                 </Button>
                 <Button type="button" onClick={onClose}>Voltar para o carrinho</Button>
@@ -174,42 +244,45 @@ export default function Checkout({ open, onClose }: Props) {
           )}
 
           {step === Steps.PAYMENT && (
-            <form>
+            <form onSubmit={(e) => { e.preventDefault(); handleFinishPayment(); }}>
               <Title>Pagamento - Valor a pagar {money(total)}</Title>
               <InputGroup>
                 <label htmlFor="cardName">Nome no cartão</label>
-                <input id="cardName" type="text" value={payment.cardName} onChange={e => setPayment({...payment, cardName: e.target.value})} />
+                <input id="cardName" type="text" value={payment.cardName} onChange={e => setPayment({...payment, cardName: e.target.value})} required />
               </InputGroup>
               <Row>
                 <InputGroup>
                   <label htmlFor="cardNumber">Número do cartão</label>
-                  <input id="cardNumber" type="text" value={payment.cardNumber} onChange={e => setPayment({...payment, cardNumber: e.target.value})} />
+                  <input id="cardNumber" type="text" value={payment.cardNumber} onChange={e => setPayment({...payment, cardNumber: e.target.value})} required minLength={13} maxLength={19} />
                 </InputGroup>
                 <InputGroup>
                   <label htmlFor="cardCode">CVV</label>
-                  <input id="cardCode" type="text" value={payment.cardCode} onChange={e => setPayment({...payment, cardCode: e.target.value})} />
+                  <input id="cardCode" type="text" value={payment.cardCode} onChange={e => setPayment({...payment, cardCode: e.target.value})} required minLength={3} maxLength={4} />
                 </InputGroup>
               </Row>
               <Row>
                 <InputGroup>
                   <label htmlFor="expiresMonth">Mês de vencimento</label>
-                  <input id="expiresMonth" type="text" value={payment.expiresMonth} onChange={e => setPayment({...payment, expiresMonth: e.target.value})} />
+                  <input id="expiresMonth" type="text" value={payment.expiresMonth} onChange={e => setPayment({...payment, expiresMonth: e.target.value})} required minLength={1} maxLength={2} />
                 </InputGroup>
                 <InputGroup>
                   <label htmlFor="expiresYear">Ano de vencimento</label>
-                  <input id="expiresYear" type="text" value={payment.expiresYear} onChange={e => setPayment({...payment, expiresYear: e.target.value})} />
+                  <input id="expiresYear" type="text" value={payment.expiresYear} onChange={e => setPayment({...payment, expiresYear: e.target.value})} required minLength={4} maxLength={4} />
                 </InputGroup>
               </Row>
+              {apiError && <p style={{ color: 'yellow', marginTop: '16px' }}>{apiError}</p>}
               <ButtonGroup>
-                <Button type="button" onClick={() => setStep(Steps.CONFIRM)} disabled={!canFinish}>Finalizar pagamento</Button>
+                <Button type="submit" disabled={!canFinish || isSubmitting}>
+                  {isSubmitting ? 'Finalizando...' : 'Finalizar pagamento'}
+                </Button>
                 <Button type="button" onClick={() => setStep(Steps.DELIVERY)}>Voltar para a edição de endereço</Button>
               </ButtonGroup>
             </form>
           )}
 
-          {step === Steps.CONFIRM && (
+          {step === Steps.CONFIRM && orderResponse && (
             <div>
-              <Title>Pedido realizado - {orderId}</Title>
+              <Title>Pedido realizado - {orderResponse.orderId}</Title>
               <ConfirmationText>
                 Estamos felizes em informar que seu pedido já está em processo de preparação e, em breve, será entregue no endereço fornecido.
               </ConfirmationText>
