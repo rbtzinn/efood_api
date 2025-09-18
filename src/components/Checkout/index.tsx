@@ -100,18 +100,18 @@ export default function Checkout({ open, onClose }: Props) {
   })
 
   const canProceedPayment =
-    address.receiver &&
-    address.address &&
-    address.city &&
-    address.zipCode &&
-    address.number
+  address.receiver.trim().length > 2 &&
+  address.address.trim().length > 5 &&
+  address.city.trim().length > 2 &&
+  address.zipCode.length === 9 && !address.zipCode.includes('_') &&
+  address.number.length > 0
 
   const canFinish =
-    payment.cardName &&
-    payment.cardNumber &&
-    payment.cardCode &&
-    payment.expiresMonth &&
-    payment.expiresYear
+  payment.cardName.trim().length > 5 &&
+  payment.cardNumber.length === 19 && !payment.cardNumber.includes('_') &&
+  payment.cardCode.length === 3 && !payment.cardCode.includes('_') &&
+  payment.expiresMonth.length === 2 && !payment.expiresMonth.includes('_') &&
+  payment.expiresYear.length === 2 && !payment.expiresYear.includes('_')
 
   const resetAll = () => {
     clear()
@@ -222,7 +222,10 @@ export default function Checkout({ open, onClose }: Props) {
             <form
               onSubmit={(e) => {
                 e.preventDefault()
-                setStep(Steps.PAYMENT)
+                // A VERIFICAÇÃO FINAL ESTÁ AQUI
+                if (canProceedPayment) {
+                  setStep(Steps.PAYMENT)
+                }
               }}
             >
               <Title>Entrega</Title>
